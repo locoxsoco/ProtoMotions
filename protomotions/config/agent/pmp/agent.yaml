@@ -1,0 +1,11 @@
+# @package _global_
+
+defaults:
+  - /agent/amp/agent
+
+agent:
+  _target_: protomotions.agents.pmp.agent.PMP
+  _recursive_: False
+  config:
+    model:
+      _target_: protomotions.agents.pmp.model.PMPModel

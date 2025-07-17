@@ -1,0 +1,107 @@
+# @package _global_
+
+agent:
+  config:
+    # Setup discriminator structure
+    model:
+      config:
+        discriminators:
+          - _target_: protomotions.agents.amp.model.Discriminator
+            _recursive_: False
+            num_in: ${eval:${.config.obs_size}*${env.config.humanoid_obs.num_historical_steps}}
+            num_out: 1
+            config:
+              name: lower_body
+              obs_key: historical_self_obs
+              obs_size: 132
+              obs_indices:
+                - [ 1,25 ]
+                - [ 154,208 ]
+                - [ 466,493 ]
+                - [ 622,649 ]
+              normalize_obs: True
+              norm_clamp_value: 5
+              layers:
+                - units: 1024
+                  activation: relu
+                  use_layer_norm: false
+                - units: 512
+                  activation: relu
+                  use_layer_norm: false
+          - _target_: protomotions.agents.amp.model.Discriminator
+            _recursive_: False
+            num_in: ${eval:${.config.obs_size}*${env.config.humanoid_obs.num_historical_steps}}
+            num_out: 1
+            config:
+              name: upper_body
+              obs_key: historical_self_obs
+              obs_size: 165
+              obs_indices:
+                - [ 25,49 ]
+                - [ 97,106 ]
+                - [ 208,256 ]
+                - [ 352,370 ]
+                - [ 493,517 ]
+                - [ 565,574 ]
+                - [ 649,673 ]
+                - [ 721,730 ]
+              normalize_obs: True
+              norm_clamp_value: 5
+              layers:
+                - units: 1024
+                  activation: relu
+                  use_layer_norm: false
+                - units: 512
+                  activation: relu
+                  use_layer_norm: false
+          - _target_: protomotions.agents.amp.model.Discriminator
+            _recursive_: False
+            num_in: ${eval:${.config.obs_size}*${env.config.humanoid_obs.num_historical_steps}}
+            num_out: 1
+            config:
+              name: left_hand
+              obs_key: historical_self_obs
+              obs_size: 240
+              obs_indices:
+                - [ 49,97 ]
+                - [ 256,352 ]
+                - [ 517,565 ]
+                - [ 673,721 ]
+              normalize_obs: True
+              norm_clamp_value: 5
+              layers:
+                - units: 1024
+                  activation: relu
+                  use_layer_norm: false
+                - units: 512
+                  activation: relu
+                  use_layer_norm: false
+          - _target_: protomotions.agents.amp.model.Discriminator
+            _recursive_: False
+            num_in: ${eval:${.config.obs_size}*${env.config.humanoid_obs.num_historical_steps}}
+            num_out: 1
+            config:
+              name: right_hand
+              obs_key: historical_self_obs
+              obs_size: 240
+              obs_indices:
+                - [ 106,154 ]
+                - [ 370,466 ]
+                - [ 574,622 ]
+                - [ 730,778 ]
+              normalize_obs: True
+              norm_clamp_value: 5
+              layers:
+                - units: 1024
+                  activation: relu
+                  use_layer_norm: false
+                - units: 512
+                  activation: relu
+                  use_layer_norm: false
+
+        discriminator_optimizer:
+          _target_: torch.optim.Adam
+          lr: 1e-4
+
+    extra_inputs:
+      historical_self_obs: true  # we create as a dict to ensure hydra combines with other extra_inputs

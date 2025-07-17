@@ -1,0 +1,15 @@
+# @package _global_
+
+defaults:
+  - /agent/pmp/agent
+  - /env/base_env
+
+  - /agent/ppo/models/mlp_actor
+  - /agent/ppo/models/mlp_critic
+  - /agent/pmp/models/mlp_discriminators_smplx_4_discs
+
+env:
+  config:
+    state_init: Data
+    humanoid_obs:
+      num_historical_steps: 2
