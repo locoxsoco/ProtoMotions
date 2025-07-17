@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - /agent/pmp/agent
+
+agent:
+  _target_: protomotions.agents.pha.agent.PHA
+  _recursive_: False
+  config:
+    model:
+      _target_: protomotions.agents.pha.model.PHAModel
+    num_steps: 16
