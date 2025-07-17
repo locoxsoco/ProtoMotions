@@ -40,11 +40,11 @@ class PMP(PPO):
         )
         discriminator_optimizers = []
         for i, discriminator in enumerate(model._discriminators):
-            optimizer = instantiate(
+            disc_optimizer = instantiate(
                 self.config.model.config.discriminator_optimizer,
                 params=list(discriminator.parameters()),
             )
-            discriminator_optimizers.append(optimizer)
+            discriminator_optimizers.append(disc_optimizer)
 
         (
             self.model,
