@@ -6,7 +6,7 @@ defaults:
 
   - /agent/ppo/models/mlp_actor
   - /agent/ppo/models/mlp_critic
-  - /agent/pmp/models/mlp_discriminators_smplx_4_discs
+  - /agent/pmp/models/mlp_discriminators_smplx_4_sets
 
 env:
   config:
