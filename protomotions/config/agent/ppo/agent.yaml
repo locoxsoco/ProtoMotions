@@ -11,7 +11,7 @@ agent:
       _recursive_: False
       config: ???  # Config to be filled by the module-specific configs
     # PPO parameters
-    num_steps: 32
+    num_steps: 16
     tau: 0.95
     gamma: 0.99
     e_clip: 0.2
