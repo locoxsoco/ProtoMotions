@@ -18,7 +18,6 @@ from protomotions.simulator.isaaclab.utils.robots import (
     H1_CFG,
     G1_CFG,
     AMP_CFG,
-    AMPX_CFG,
 )
 
 
