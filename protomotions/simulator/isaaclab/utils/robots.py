@@ -397,3 +397,106 @@ G1_CFG = ArticulationCfg(
     ),
     soft_joint_pos_limit_factor=0.9,
 )
+
+AMP_CFG = ArticulationCfg(
+    spawn=sim_utils.UsdFileCfg(
+        usd_path="protomotions/data/assets/usd/amp_humanoid.usda",
+        activate_contact_sensors=True,
+        fixed_tendons_props=sim_utils.FixedTendonPropertiesCfg(limit_stiffness=30.0, damping=0.1),
+        rigid_props=sim_utils.RigidBodyPropertiesCfg(
+            disable_gravity=False,
+            retain_accelerations=False,
+            linear_damping=0.0,
+            angular_damping=0.0,
+            max_linear_velocity=1000.0,
+            max_angular_velocity=1000.0,
+            max_depenetration_velocity=1.0,
+        ),
+        articulation_props=sim_utils.ArticulationRootPropertiesCfg(
+            enabled_self_collisions=True,
+            solver_position_iteration_count=4,
+            solver_velocity_iteration_count=4,
+        ),
+        visual_material=sim_utils.PreviewSurfaceCfg(
+            diffuse_color=(0.65, 0.1, 1.0), metallic=0.5
+        ),
+    ),
+    init_state=ArticulationCfg.InitialStateCfg(
+        pos=(
+            0.0,
+            0.0,
+            0.95,
+        ),  # Default initial state of SMPL with the upright configuration
+        joint_pos={".*": 0.0},
+        joint_vel={".*": 0.0},
+    ),
+    soft_joint_pos_limit_factor=0.9,
+    actuators={
+        "legs": ImplicitActuatorCfg(
+            joint_names_expr=[
+                "right_hip_.",
+                "left_hip_.",
+                "right_knee_.",
+                "left_knee_.",
+                "right_ankle_.",
+                "left_ankle_.",
+            ],
+            effort_limit=500,
+            velocity_limit=100.0,
+            stiffness={
+                "right_hip_.": 800,
+                "left_hip_.": 800,
+                "right_knee_.": 800,
+                "left_knee_.": 800,
+                "right_ankle_.": 800,
+                "left_ankle_.": 800,
+            },
+            damping={
+                "right_hip_.": 80,
+                "left_hip_.": 80,
+                "right_knee_.": 80,
+                "left_knee_.": 80,
+                "right_ankle_.": 80,
+                "left_ankle_.": 80,
+            },
+        ),
+        "torso": ImplicitActuatorCfg(
+            joint_names_expr=[
+                "abdomen_.",
+                "neck_.",
+            ],
+            effort_limit=500,
+            velocity_limit=100.0,
+            stiffness={
+                "abdomen_.": 1000,
+                "neck_.": 500,
+            },
+            damping={
+                "abdomen_.": 100,
+                "neck_.": 50,
+            },
+        ),
+        "arms": ImplicitActuatorCfg(
+            joint_names_expr=[
+                "right_shoulder_.",
+                "left_shoulder_.",
+                "right_elbow_.",
+                "left_elbow_.",
+            ],
+            effort_limit=500,
+            velocity_limit=100.0,
+            stiffness={
+                "right_shoulder_.": 500,
+                "left_shoulder_.": 500,
+                "right_elbow_.": 500,
+                "left_elbow_.": 500,
+            },
+            damping={
+                "right_shoulder_.": 50,
+                "left_shoulder_.": 50,
+                "right_elbow_.": 50,
+                "left_elbow_.": 50,
+            },
+        ),
+    },
+)

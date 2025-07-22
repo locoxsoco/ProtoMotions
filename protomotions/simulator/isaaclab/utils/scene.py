@@ -16,6 +16,9 @@ from protomotions.simulator.isaaclab.utils.robots import (
     SMPL_CFG,
     SMPLX_CFG,
     H1_CFG,
+    G1_CFG,
+    AMP_CFG,
+    AMPX_CFG,
 )
 
 
@@ -112,6 +115,14 @@ class SceneCfg(InteractiveSceneCfg):
                 )
             self.contact_sensor: ContactSensorCfg = ContactSensorCfg(
                 prim_path="/World/envs/env_.*/Robot/.*",
+                filter_prim_paths_expr=[f"/World/objects/object_{i}" for i in range(0)],
+            )
+        elif robot_type == "amp_humanoid":
+            self.robot: ArticulationCfg = AMP_CFG.replace(
+                prim_path="/World/envs/env_.*/Robot"
+            )
+            self.contact_sensor: ContactSensorCfg = ContactSensorCfg(
+                prim_path="/World/envs/env_.*/Robot/bodies/.*",
                 filter_prim_paths_expr=[f"/World/objects/object_{i}" for i in range(0)],
             )
         else:
