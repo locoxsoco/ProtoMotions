@@ -3,6 +3,7 @@ import logging
 
 from torch import Tensor
 import math
+import itertools
 
 from lightning.fabric import Fabric
 from hydra.utils import instantiate
@@ -111,45 +112,40 @@ class PMP(PPO):
 
         expert_historical_self_obs = self.get_expert_historical_self_obs(num_samples)
 
-        discs_number_steps = self.env.self_obs_cb.config.num_historical_steps
+        num_hist_steps = self.env.self_obs_cb.config.num_historical_steps
         reshaped_historical_self_obs = historical_self_obs.view(
-            historical_self_obs.shape[0], discs_number_steps, historical_self_obs.shape[1] // discs_number_steps
+            historical_self_obs.shape[0], num_hist_steps, historical_self_obs.shape[1] // num_hist_steps
         )
         replay_historical_self_obs = replay_historical_self_obs.view(
-            replay_historical_self_obs.shape[0], discs_number_steps, replay_historical_self_obs.shape[1] // discs_number_steps
+            replay_historical_self_obs.shape[0], num_hist_steps, replay_historical_self_obs.shape[1] // num_hist_steps
         )
         expert_historical_self_obs = expert_historical_self_obs.view(
-            expert_historical_self_obs.shape[0], discs_number_steps, expert_historical_self_obs.shape[1] // discs_number_steps
+            expert_historical_self_obs.shape[0], num_hist_steps, expert_historical_self_obs.shape[1] // num_hist_steps
         )
 
-        # Extract the obs parts based on config indices
+        # Extract the obs parts based on config indices.
+        # TODO: This could be generated in advance.
         body_part_indices = []
         for i, _ in enumerate(self.model._discriminator_obs_indices):
             body_part_indices.append(
                 torch.cat([torch.arange(start, end) for start, end in self.model._discriminator_obs_indices[i]
             ]).to(self.device))
 
-        # Extract parts for each of the discs_number_steps time steps
-        agent_historical_self_obs_parts = []
-        replay_historical_self_obs_parts = []
-        expert_historical_self_obs_parts = []
+        # Extract parts for each of the num_hist_steps time steps
         discriminator_training_data_dict = {}
         for body_part_id, indices in enumerate(body_part_indices):
             # Process historical observations from the agent
             agent_obs = reshaped_historical_self_obs[..., indices].view(
-                historical_self_obs.shape[0], discs_number_steps * indices.numel()
+                historical_self_obs.shape[0], num_hist_steps * indices.numel()
             )
-            agent_historical_self_obs_parts.append(agent_obs)
             # Process historical observations from the replay buffer
             replay_obs = replay_historical_self_obs[..., indices].view(
-                replay_historical_self_obs.shape[0], discs_number_steps * indices.numel()
+                replay_historical_self_obs.shape[0], num_hist_steps * indices.numel()
             )
-            replay_historical_self_obs_parts.append(replay_obs)
             # Process historical observations from demonstration data
             expert_obs = expert_historical_self_obs[..., indices].view(
-                expert_historical_self_obs.shape[0], discs_number_steps * indices.numel()
+                expert_historical_self_obs.shape[0], num_hist_steps * indices.numel()
             )
-            expert_historical_self_obs_parts.append(expert_obs)
 
             # Update discriminator training data dictionary
             disc_name = self.model._discriminator_names[body_part_id]
@@ -190,14 +186,13 @@ class PMP(PPO):
     def calculate_extra_reward(self):
         rew = super().calculate_extra_reward()
 
-        discs_number_steps = self.env.self_obs_cb.config.num_historical_steps
+        num_hist_steps = self.env.self_obs_cb.config.num_historical_steps
         historical_self_obs = self.experience_buffer.historical_self_obs
         historical_self_obs = historical_self_obs.view(
-            self.num_envs * self.num_steps, discs_number_steps, historical_self_obs.shape[-1] // discs_number_steps
+            self.num_envs * self.num_steps, num_hist_steps, historical_self_obs.shape[-1] // num_hist_steps
         )
 
         # Extract parts for each discriminator based on specific indices
-        historical_self_obs_parts = []
         pmp_rewards = []
         for body_part_id, indices in enumerate(self.model._discriminator_obs_indices):
             part_indices = torch.cat([
@@ -205,9 +200,8 @@ class PMP(PPO):
             ]).to(self.device)
 
             historical_self_obs_part = historical_self_obs[..., part_indices].view(
-                self.num_steps * self.num_envs, discs_number_steps * part_indices.numel()
+                self.num_steps * self.num_envs, num_hist_steps * part_indices.numel()
             )
-            historical_self_obs_parts.append(historical_self_obs_part)
 
             pmp_reward = self.model._discriminators[body_part_id].compute_reward(
                 {
@@ -220,8 +214,11 @@ class PMP(PPO):
                 f"pmp_rewards_{self.model._discriminator_names[body_part_id]}", pmp_reward
             )
 
-        # Average rewards across all discriminators
-        pmp_r = sum(pmp_rewards) / len(pmp_rewards)
+        # Get all combinations of two values
+        pmp_combinations = itertools.combinations(pmp_rewards, 2)
+        # Multiply each pair and collect the products
+        pmp_products = [a * b for a, b in pmp_combinations]
+        pmp_r = sum(pmp_products) / len(pmp_products)
 
         extra_reward = pmp_r * self.config.discriminator_reward_w + rew
         return extra_reward
