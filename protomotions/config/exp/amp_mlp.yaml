@@ -13,3 +13,4 @@ env:
     state_init: Data
     humanoid_obs:
       num_historical_steps: 8
+    enable_height_termination: True
