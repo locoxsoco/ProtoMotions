@@ -11,6 +11,7 @@ agent:
             num_out: 24
             config:
               name: lower
+              action_order: 0
               actor_logstd: -2.9
               mu_model:
                 _target_: protomotions.agents.common.mlp.MultiHeadedMLP
@@ -44,6 +45,7 @@ agent:
             num_out: 33
             config:
               name: upper
+              action_order: 1
               actor_logstd: -2.9
               mu_model:
                 _target_: protomotions.agents.common.mlp.MultiHeadedMLP
@@ -77,6 +79,7 @@ agent:
             num_out: 48
             config:
               name: left_hand
+              action_order: 2
               actor_logstd: -2.9
               mu_model:
                 _target_: protomotions.agents.common.mlp.MultiHeadedMLP
@@ -110,6 +113,7 @@ agent:
             num_out: 48
             config:
               name: right_hand
+              action_order: 3
               actor_logstd: -2.9
               mu_model:
                 _target_: protomotions.agents.common.mlp.MultiHeadedMLP

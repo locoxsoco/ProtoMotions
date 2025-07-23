@@ -14,10 +14,12 @@ class PHAModel(PMPModel):
         self._actors = nn.ModuleList()
         self._actor_names = []
         self._actor_shapes = []
+        self._action_order = []
         for actor_config in self.config.actors:
             self._actors.append(instantiate(actor_config))
             self._actor_names.append(actor_config.config.name)
             self._actor_shapes.append(actor_config.config.mu_model.config.num_out)
+            self._action_order.append(actor_config.config.action_order)
 
         print(f"Initialized {len(self._actors)} actors.")
         assert (

@@ -320,7 +320,7 @@ class PHA(PMP):
                         if torch.isnan(action).any():
                             raise ValueError(f"NaN in action: {self.model._actor_names[action_id]}")
 
-                    action = torch.cat(actions,dim=-1,)
+                    action = torch.cat([actions[i] for i in self.model._action_order], dim=-1)
                     # Step the environment
                     next_obs, rewards, dones, terminated, extras = self.env_step(action)
 

@@ -8,10 +8,10 @@ agent:
         actors:
           - _target_: protomotions.agents.ppo.model.PPOActor
             _recursive_: False
-            num_out: 24
+            num_out: 18
             config:
               name: lower
-              action_order: 0
+              action_order: 1
               actor_logstd: -2.9
               mu_model:
                 _target_: protomotions.agents.common.mlp.MultiHeadedMLP
@@ -42,10 +42,10 @@ agent:
                           use_layer_norm: false
           - _target_: protomotions.agents.ppo.model.PPOActor
             _recursive_: False
-            num_out: 45
+            num_out: 18
             config:
               name: upper
-              action_order: 1
+              action_order: 0
               actor_logstd: -2.9
               mu_model:
                 _target_: protomotions.agents.common.mlp.MultiHeadedMLP
