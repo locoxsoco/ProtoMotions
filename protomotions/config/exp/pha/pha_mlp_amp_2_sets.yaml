@@ -1,0 +1,17 @@
+# @package _global_
+
+defaults:
+  - /agent/pha/agent
+  - /env/base_env
+
+  - /agent/pha/models/mlp_actors_amp_2_sets
+  - /agent/ppo/models/mlp_critic
+  - /agent/pmp/models/mlp_discriminators_amp_2_sets
+
+env:
+  config:
+    state_init: Data
+    humanoid_obs:
+      num_historical_steps: 8
+    enable_height_termination: True
+
