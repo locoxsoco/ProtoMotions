@@ -1,6 +1,7 @@
 import torch
 import logging
 
+from protomotions.agents.pha.model import PHAModel
 from torch import Tensor
 import time
 
@@ -31,7 +32,7 @@ class PHA(PMP):
         )
 
     def setup(self):
-        model: PMPModel = instantiate(self.config.model)
+        model: PHAModel = instantiate(self.config.model)
         model.apply(weight_init)
 
         actor_optimizers = []
@@ -97,6 +98,14 @@ class PHA(PMP):
 
             # Update actors
             for actor_id, actor_name in enumerate(self.model._actor_names):
+                self.eval()
+                with torch.no_grad():
+                    dist = self.model._actors[actor_id](batch_dict)
+                    logstd = self.model._actors[actor_id].logstd
+                    std = torch.exp(logstd)
+                    neglogp = self.model.neglogp(batch_dict[f"actions_{actor_name}"], dist.mean, std, logstd)
+                    batch_dict[f"cur_neglogp_{actor_name}"] = neglogp
+                self.train()
                 actor_loss, actor_loss_dict = self.actor_step(batch_dict, actor_id, actor_name)
                 iter_log_dict.update(actor_loss_dict)
                 actor_optimizer = self.actor_optimizers[actor_id]
@@ -168,7 +177,7 @@ class PHA(PMP):
            ratio_harl = torch.exp(
                torch.sum(
                    torch.stack([
-                       batch_dict[f"neglogp_{self.model._actor_names[i]}"] - batch_dict[f"new_neglogp_{self.model._actor_names[i]}"]
+                       batch_dict[f"cur_neglogp_{self.model._actor_names[i]}"] - batch_dict[f"new_neglogp_{self.model._actor_names[i]}"]
                        for i in range(body_part_id)
                    ])
                )

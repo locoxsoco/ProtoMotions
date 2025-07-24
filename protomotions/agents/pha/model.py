@@ -1,11 +1,11 @@
 import torch
 from torch import nn
 from hydra.utils import instantiate
-from protomotions.agents.pmp.model import PMPModel
+from protomotions.agents.ppo.model import PPOModel
 from protomotions.agents.common.mlp import MultiHeadedMLP
 
 
-class PHAModel(PMPModel):
+class PHAModel(PPOModel):
     def __init__(self, config):
         nn.Module.__init__(self)
         self.config = config
@@ -72,6 +72,6 @@ class PHAModel(PMPModel):
 
             actions.append(action)
 
-        action = torch.cat(actions, dim=-1)
+        action = torch.cat([actions[i] for i in self._action_order], dim=-1)
 
         return action
